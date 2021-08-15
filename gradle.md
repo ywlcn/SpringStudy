@@ -8,6 +8,10 @@
 
   setting.gradle内容の解析
 
+  プロジェクト構成の生成
+
+  Configureステップの実施に必要なBuildScr定義の解析？　JVMの準備　クラスパスなど・・・・❓
+
 - Configure
 
   build.gradleの解析と設定
@@ -23,15 +27,15 @@
 - スクリプト
 
   ```groovy
-  println "Outer"				・・・Configureの場合に実施される
+  println "Outer"				・・・Configureのステップに実施される
   
   task hello {
-      println "inner"			・・・Configureの場合に実施される
+      println "inner"			・・・Configureのステップに実施される
       doLast {
-          println "doLast"		・・・Executionの場合に実施される
+          println "doLast"		・・・Executionのステップに実施される
       }
       doFirst {
-          println "doFirst"		・・・Executionの場合に実施される
+          println "doFirst"		・・・Executionのステップに実施される
       }g
   }
   ```
@@ -57,11 +61,42 @@
 ## 2.1 例
 
 ```groovy
+// この部分の定義は本build.gradleを実施する際に、必要な設定クラスパスなど
+buildscript {
+	// 変数定義
+	ext.versions = [
+		'java' : '1.8',
+		'springboot' : '2.3.4.RELEASE',
+	]
+	// このリポジトリの定義は「buildscript」のdependenciesのために定義する
+	repositories {
+		mavenCentral()    
+		maven {
+			url "https://plugins.gradle.org/m2/"
+		}
+	}
+	// ここには本build.gradleを実施する際、必要になるJarファイルをクラスパスに入れる
+    // 例えばpluginやimportなど
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${versions.springboot}")
+		classpath "com.moowork.gradle:gradle-node-plugin:1.3.1"
+	}
+}
+
+// ラグイン定義方法１
+// こにはもしGradleに付属以外のpluginを使用したい場合、buildscriptに必ず使用されるプラグインの
+// ファイルをクラスパスに追加する必要です。
+apply plugin: 'avaPlugin'
+apply plugin: 'eclipse'
+
+//プラグイン定義方法２
+//この記述方法であれば、デフォルトGradleに付属しているプラグインはIDだけでよいです。
+//もし付属していなければ「https://plugins.gradle.org/」にアクセスして、ダウンロードします。
+//その場合バージョンを記載しなければならないです。
 plugins {
 	id "java"
-        // これは、依存関係を一元管理ために記載している
-        // dependencyManagementとあわせて使用すると効果がある。
-　　// これだけ記載して、あんまり意味ないと思う・・・
+    // これは、依存関係を一元管理ために記載している
+    // dependencyManagementとあわせて使用すると効果がある。
 	id "io.spring.dependency-management" version "1.0.10.RELEASE"
 }
 
@@ -70,6 +105,7 @@ repositories {
 	mavenCentral()
 }
 
+// 推移的な依存関係の定義
 dependencyManagement {
 	dependencies {
 		// これを記載しないと、下の依存関係が解決できない
@@ -108,12 +144,57 @@ dependencies {
     // main　sourceSetsに対する依存関係の定義
     implementation "org.springframework:spring-webmvc"
     
+    implementation fileTree(dir: "${System.properties['user.home']}/lib/" , includes: ['*.jar'])
+    implementation files('libs/foo.jar', 'libs/bar.jar')
+    
     // test　sourceSetsに対する依存関係の定義
 	testCompile "org.springframework:spring-webmvc"
     
     // other　sourceSetsに対する依存関係の定義
     otherimplementation "org.springframework:spring-webmvc"
 }
+
+
+jar {
+    manifestContentCharset 'utf-8'
+    metadataCharset 'utf-8'
+    manifest {
+        attributes "Main-Class": "cn.buddie.GradleTest"
+    }
+    from {
+        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+    }
+}
+
+eclipse {
+    classpath {
+       downloadSources=true
+    }
+}
+
+task sourcesJar(type: Jar, dependsOn: classes) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+tasks.withType(Javadoc) {
+    options.addStringOption('Xdoclint:none', '-quiet')
+    options.addStringOption('encoding', 'UTF-8')
+    options.addStringOption('charSet', 'UTF-8')
+}
+
+artifacts {
+    archives sourcesJar
+    archives javadocJar
+}
+
+
+
 ```
 
 
@@ -144,9 +225,9 @@ dependencies {
 
   テストのコンパイル時のみ必要なライブラリを定義する場合、使用されます。
 
-- runtimeOnly（apk）
+- runtimeOnly
 
-  只在生成`apk`的时候参与打包，编译时不会参与，很少用。
+  ❓❓❓❓
 
 - **implementation VS compile（api）**
 
@@ -217,22 +298,50 @@ dependencies {
 ### 2.3.3 特定の依存関係をバージョン指定
 
 ```groovy
-configuration.all {
-	resolutionStrategy{
-		force 'org.springframework:spring-web'
-	}
+configuration.all.resolutionStrategy{
+	force 'org.springframework:spring-web'
 }
 ```
 
 ### 2.3.4 依存関係競争自動解決しない
 
 ```groovy
-configuration.all {
-	resolutionStrategy{
-		fallOnVersionConflict()
-	}
+configurations.all {
+    resolutionStrategy.failOnVersionConflict()
 }
 ```
+
+## 2.4 カスタマイズConfig❓
+
+
+
+
+
+## 2.5 依存関係ローカルコピー
+
+```groovy
+task copyDependenciesToLocalDir(type: Copy){
+	from configurations.XXX.asFileTree
+    to "${System.properties['user.home']}/lib/temp"
+}
+XXX:compile rumetime ...
+```
+
+
+
+## 2.6 SnapShotと動態モジュールのキャッシュ設定
+
+```groovy
+// https://docs.gradle.org/current/userguide/dynamic_versions.html#sec:controlling_dependency_caching_programmatically
+configurations.all {
+    // 設定DynamicVersionsのキャッシュ期間
+    resolutionStrategy.cacheDynamicVersionsFor 10, 'minutes'
+    // 設定モジュールのキャッシュ期間
+    resolutionStrategy.cacheChangingModulesFor 4, 'hours'
+}
+```
+
+
 
 
 
@@ -246,22 +355,50 @@ configuration.all {
 
 - script plugins
 
-  - 定義例  `other.gradle`
+  - gradeファイルの方法
 
-    ```groovy
-    ext {
-        veon='1.1.0'
-        url='http://www.google.com'
-    }
-    ```
+    - 定義例  `other.gradle`
+  
+      ```groovy
+      ext {
+          veon='1.1.0'
+          url='http://www.google.com'
+      }
+      ```
 
-  - 使用例
-
-    ```groovy
-    apply from: 'other.gradle'
-    ```
-
-    
+    - 使用例
+  
+      ```groovy
+      apply from: 'other.gradle'
+      ```
+  
+  - Javaソースでのほうほう
+  
+    - `[projectPath]\buildSrc\src\main\java` 　pluginを実現されたクラスファイルを格納すれば　例えば
+  
+      ```Java
+      
+      import org.gradle.api.Plugin;
+      import org.gradle.api.Project;
+      
+      public class BinaryRepositoryVersionPlugin implements Plugin<Project> {
+          public void apply(Project project) {
+              BinaryRepositoryExtension extension =
+                  project.getExtensions().create("binaryRepo", BinaryRepositoryExtension.class);
+      
+              project.getTasks().register("latestArtifactVersion", LatestArtifactVersion.class, task -> {
+                  task.getCoordinates().set(extension.getCoordinates());
+                  task.getServerUrl().set(extension.getServerUrl());
+              });
+          }
+      }
+      ```
+  
+    - 使用例
+  
+      ```groovy
+      apply　plugins : BinaryRepositoryVersionPlugin
+      ```
 
 ### 3.1.2 binary plugins の切り分け
 
@@ -283,6 +420,16 @@ configuration.all {
       id "com.jfrog.bintray" version "0.4.1"
   }
   ```
+
+
+
+XXX.jar/META-INF/gradle-plugins/[pluginName].properties
+
+```
+implementation-class=com.andriod.xxx.xxx
+```
+
+
 
 ## 3.2 適用方法
 
@@ -378,9 +525,10 @@ greeting.greeter = 'Gradle'
 
 
 
-3.5 java プラグイン
+## 3.5 java プラグイン
 
-
+- 提供するタスク
+- 提供する拡張
 
 ```groovy
 sourceSets {
@@ -413,6 +561,12 @@ task otherDoc(type:Javadoc){
 ```
 
 
+
+## 3.6 eclipse プラグイン
+
+- 提供するタスク
+
+- 提供する拡張
 
 
 
@@ -474,6 +628,7 @@ tasks.withType(Javadoc){
     taskX.dependsOn taskY
     taskY.dependsOn taskZ
     taskZ.shouldRunAfter taskX
+    first.finalizedBy second
     ```
 
 - サブプロジェクト間の順序指定
@@ -499,7 +654,7 @@ tasks.withType(Javadoc){
 
 ## 4.3 タスクの実施指定
 
-- プロパティより実施するかどうかの制御
+- プロパティより実施するかどうかの制御、Excute部分のみ、コンフィグは実施される
 
   例：
 
@@ -531,4 +686,198 @@ tasks.withType(Javadoc){
 
 
 
-5 Pulish
+# 5 Pulish
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 6 class
+
+Gradleタスクを実施する際に、下記のパスに、Build.gradleをクラスファイルに生成される・・
+
+D:\Tools-Java\gradle-5.6.4\jar-caches\caches\5.6.4\scripts-remapped
+
+例：
+
+
+
+
+
+
+
+# 7 ユーザーフォルダ
+
+
+
+
+
+
+
+# 8 Daemon
+
+
+
+# 9.ラッパー
+
+
+
+# 10.マルチプロジェクト
+
+http://gradle.monochromeroad.com/docs/userguide/multi_project_builds.html
+
+## 10.1 関連コマンド
+
+```groovy
+// 対象プロジェクトの依存関係プロジェクトをコンパイルせず、本プロジェクトのみコンパイルする
+Gradle :[project]:build -a
+
+
+```
+
+## 10.2 構成
+
+```groovy
+test
+ ├─src
+ ├─build.gradle
+ ├─settings.gradle
+ ├─shared
+ │  ├─src
+ │  └─build.gradle  // なくでもよい、親プロジェクトのbuild.gradleに定義してもよい
+ │
+ ├─api
+ │  ├─src
+ │  └─build.gradle  // なくでもよい、親プロジェクトのbuild.gradleに定義してもよい
+ │
+ └─services
+    ├─src
+    └─build.gradle  // なくでもよい、親プロジェクトのbuild.gradleに定義してもよい
+ 
+```
+
+## 10.3 build.gradle記載例
+
+- settings.gradle
+
+```groovy
+rootProject.name = 'test'
+
+include 'shared'
+include 'api'
+include 'services'
+include 'AAA:BBB:CCC' //階層的なフォルダ構成
+
+// 各サブプロジェクトのBuild.gradleファイル名の指定
+// todo-sharedというサブプロジェクトであれば、shared.gradleとする
+rootProject.children.each{
+    it.buildFileName = it.name + '.gradle' - 'todo-'
+}
+
+```
+
+- build.gradle
+
+```groovy
+// 全てのプロジェクトに適用
+allprojects {
+    task hello << {task -> println "I'm $task.project.name" }
+}
+// Root以外のプロジェクトに適用
+subprojects {
+    hello << {println "- I depend on water"}
+}
+// 特な対象プロジェクトに操作
+configure(subprojects.findAll {it.name != 'tropicalFish'}) {
+    hello << {println '- I love to spend time in the arctic waters.'}
+}
+```
+
+
+
+# Debug
+
+- 一回デバッグ終了後、Gradle --stopが必要かも
+
+
+
+# groovy
+
+
+
+# XX Gradle使用ポイント
+
+- タスク名前はキャメルケースの先頭文字で短縮できまる。
+
+  例えば、`gradle dependencies = gradle d`   ただし、短縮より、重複する場合、エラーになる
+
+- 特定タスクをスキップ
+
+  `gradle build -x test`   javaソースをビルドして、単体テスト実施せず
+
+- Javaプロジェクトでいくつかよく使用するタスク
+
+  - `gradle dependencies (gradle d)`  依存関係一覧を表示
+  - `gradle properties` プロパティ一覧を表示
+  - `gradle tasks` タスク一覧を表示
+
+- マルチプロジェクトの場合、特定プロジェクトのタスクを実施したい場合
+
+  `gradle [project-name]:build`   OR  `gradle build  -p [project-name]`
+
+- build.gradle以外のスクリプトファイルを実施する場合
+
+  `gradle build -b test.gradle`   
+
+- 変数を追加して実施する
+
+  `gradle build -Pmyprop=myvalue`   Gradleスクリプトで使用する普通な変数
+
+  `gradle build -Dmyprop=myvalue`   JVMへ連携するのシステム変数
+
+- デバッグ
+
+  ```bash
+  gradle551 help -Dorg.gradle.debug=true
+  ```
+
+  5005ポートを利用している
+
+- ローカルモード
+
+  ```
+  gradle build --offline
+  ```
+
+- バージョンConflict時エラーになるため
+
+  ```groovy
+  configurations.all {
+      resolutionStrategy.failOnVersionConflict()
+  }
+  ```
+
+- 依存関係Conflict時詳しい情報を表示
+
+  ```groovy
+  gradle :dependencyInsight --configuration houxSpring --dependency org.slf4j:slf4j-api
+  ```
+
+  
+
+
+
+
+
+ps aux | grep Gradle | awk '{print $2}' | xargs kill -9
+
