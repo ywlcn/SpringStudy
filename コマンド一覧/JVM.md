@@ -150,7 +150,8 @@ jcmd [PID]
 ## スレッド一覧を表示
 jcmd [PID] Thread.print
 ##　メモリ一覧を表示　「-XX:NativeMemoryTracking=summary/detail」が設定されていることが前提
-jcmd [PID] VM.native_memory summary
+jcmd [PID] VM.native_memory summary scale=MB
+jcmd <pid> VM.native_memory [summary | detail | baseline | summary.diff | detail.diff | shutdown] [scale= KB | MB | GB]
 ##　GCダンプを取得
 jcmd [PID] GC.heap_dump `pwd`/demo.hprof
 ##　JVMの詳細状況一覧を表示、起動引数やメモリ使用状況や
