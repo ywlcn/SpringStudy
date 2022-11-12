@@ -8,7 +8,18 @@ ENV		DOCKER_SEA_TOOL_PATH="/opt/docker/"
 ENV		KAFKA_CONNECT_REST_PORT="8084"
 ENV		KAFKA_CONNECT_LOG_PATH="/opt/kafka/logs"
 
-ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
+
+## ファイルダウンロード
+RUN cd /opt
+RUN curl https://archive.apache.org/dist/kafka/3.1.1/kafka_2.12-3.1.1.tgz -o /opt/kafka.tgz 
+RUN ls 
+RUN pwd
+RUN pwd /opt
+RUN tar -xzvf /opt/kafka.tgz 
+
+
+
+RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
 CMD		mv /opt/kafka_2.12-3.2.0		${KAFKA_HOME}
 COPY 	setup/run						${DOCKER_SEA_TOOL_PATH}
 

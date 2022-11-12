@@ -34,8 +34,13 @@ spec:
       - name: local-docker-nexus
       containers:
       - name: zookeeper
-        image: nexus.vbox.local:9001/sea-zookeeper:latest
+        image: nexus.vbox.local:9001/sea.zookeeper:latest
         imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: log-volume
+          mountPath: /opt/kafka/logs
+#        - name: data-volume
+#          mountPath: /var/lib/zookeeper
 #        resources:
 #          limits:
 #            cpu: 1000m
@@ -52,3 +57,10 @@ spec:
         options:
         - name: ndots
           value: "1"
+      volumes:
+      - name: log-volume
+        persistentVolumeClaim:
+          claimName: kafka-zookeeper-logs
+#      - name: data-volume
+#        persistentVolumeClaim:
+#          claimName: kafka-zookeeper-logs

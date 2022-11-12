@@ -23,11 +23,11 @@ then
   fi
 fi
 
-#dub template "/opt/docker/zookeeper.properties.template" "${ZOOKEEPER_HOME}/config/zookeeper.properties"
-#${DOCKER_SEA_TOOL_PATH}config.sh "${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template" "${ZOOKEEPER_HOME}/config/zookeeper.properties"
+#dub template "/opt/docker/zookeeper.properties.template" "${KAFKA_HOME}/config/zookeeper.properties"
+#${DOCKER_SEA_TOOL_PATH}config.sh "${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template" "${KAFKA_HOME}/config/zookeeper.properties"
 
 template_file="${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template"
-output_file="${ZOOKEEPER_HOME}/config/zookeeper.properties"
+output_file="${KAFKA_HOME}/config/zookeeper.properties"
 
 ### delete output file if exist
 if [ -e ${output_file} ]; then

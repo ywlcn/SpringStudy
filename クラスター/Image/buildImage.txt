@@ -1,1 +1,13 @@
-docker build -f $1 -t sea-$1 --no-cache .
+sudo docker build -f zookeeper.txt -t sea.zookeeper --no-cache .
+sudo docker build -f kafka-broker.txt -t sea.kafka-broker --no-cache .
+
+
+sudo docker tag sea.zookeeper:latest nexus.vbox.local:9001/sea.zookeeper:latest
+sudo docker push nexus.vbox.local:9001/sea.zookeeper:latest
+
+sudo docker tag sea.kafka-broker:latest nexus.vbox.local:9001/sea.kafka-broker:latest
+sudo docker push nexus.vbox.local:9001/sea.kafka-broker:latest
+
+sudo crictl pull nexus.vbox.local:9001/sea.zookeeper:latest
+sudo crictl pull nexus.vbox.local:9001/sea.kafka-broker
+

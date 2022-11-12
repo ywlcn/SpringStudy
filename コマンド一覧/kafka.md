@@ -5,6 +5,7 @@
 ```bash
 #################################Topic####################################################
 #https://jaceklaskowski.gitbooks.io/apache-kafka/content/kafka-admin-TopicCommand.html
+//  --bootstrap-server
 $ ./kafka-topics.bat --zookeeper localhost:2181 --list
 
 $ ./bin/kafka-topics.bat --zookeeper localhost:2181 --describe --topic my-topic
@@ -14,7 +15,7 @@ $ ./kafka-topics.bat --zookeeper localhost:2181 --delete --topic my-topic
 $ ./kafka-topics.sh --bootstrap-server=localhost:9092 --create --topic=mytopic       
 
 
---bootstrap-server   --zookeeper
+ --zookeeper   --->   --bootstrap-server  
 
 
 

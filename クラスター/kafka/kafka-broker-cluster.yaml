@@ -8,8 +8,8 @@ spec:
     app: kafka-broker-1
   type: NodePort
   ports:
-    - port: 9091
-      targetPort: 9091
+    - port: 9092
+      targetPort: 9092
       nodePort: 30921
       name: kafka
 #  ports:
@@ -38,11 +38,11 @@ spec:
     spec:
       containers:
       - name: broker1
-        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        image: nexus.vbox.local:9001/sea.kafka-broker:latest
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: log-volume
-          mountPath: /opt/kafka_2.12-3.2.0/logs
+          mountPath: /opt/kafka/logs
         #resources:
         #  limits:
         #    cpu: 1000m
@@ -55,12 +55,16 @@ spec:
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
         - name: KAFKA_LISTENERS
-          value: PLAINTEXT://localhost:9091
+          value: PLAINTEXT://:9092
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://192.168.56.101:30921
         - name: KAFKA_METRIC_REPORTERS
           value: io.confluent.metrics.reporter.ConfluentMetricsReporter
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
           value: "1"
         - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
           value: "0"
@@ -68,18 +72,14 @@ spec:
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
           value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
-          value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
-          value: "1"
         - name: KAFKA_JMX_PORT
-          value: "9101"
+          value: "9103"
         - name: KAFKA_JMX_HOSTNAME
           value: localhost
         - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
           value: http://schema-registry:8081
         - name: CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS
-          value: broker:29091
+          value: broker:29092
         - name: CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS
           value: "1"
         - name: CONFLUENT_METRICS_ENABLE
@@ -87,7 +87,7 @@ spec:
         - name: CONFLUENT_SUPPORT_CUSTOMER_ID
           value: 'anonymous'
         ports:
-        - containerPort: 9091
+        - containerPort: 9092
           protocol: TCP
         - containerPort: 9101
           protocol: TCP
@@ -138,11 +138,11 @@ spec:
     spec:
       containers:
       - name: broker-2
-        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        image: nexus.vbox.local:9001/sea.kafka-broker:latest
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: log-volume
-          mountPath: /opt/kafka_2.12-3.2.0/logs
+          mountPath: /opt/kafka/logs
         #resources:
         #  limits:
         #    cpu: 1000m
@@ -155,12 +155,16 @@ spec:
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
         - name: KAFKA_LISTENERS
-          value: PLAINTEXT://localhost:9092
+          value: PLAINTEXT://:9092
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://192.168.56.101:30922
         - name: KAFKA_METRIC_REPORTERS
           value: io.confluent.metrics.reporter.ConfluentMetricsReporter
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
           value: "1"
         - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
           value: "0"
@@ -168,12 +172,8 @@ spec:
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
           value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
-          value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
-          value: "1"
         - name: KAFKA_JMX_PORT
-          value: "9102"
+          value: "9103"
         - name: KAFKA_JMX_HOSTNAME
           value: localhost
         - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
@@ -212,8 +212,8 @@ spec:
     app: kafka-broker-3
   type: NodePort
   ports:
-    - port: 9093
-      targetPort: 9093
+    - port: 9092
+      targetPort: 9092
       nodePort: 30923
       name: kafka
 
@@ -238,11 +238,11 @@ spec:
     spec:
       containers:
       - name: broker-3
-        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        image: nexus.vbox.local:9001/sea.kafka-broker:latest
         imagePullPolicy: IfNotPresent
         volumeMounts:
         - name: log-volume
-          mountPath: /opt/kafka_2.12-3.2.0/logs
+          mountPath: /opt/kafka/logs
         #resources:
         #  limits:
         #    cpu: 1000m
@@ -255,22 +255,22 @@ spec:
         - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
           value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
         - name: KAFKA_LISTENERS
-          value: PLAINTEXT://localhost:9093
+          value: PLAINTEXT://:9092
         - name: KAFKA_ADVERTISED_LISTENERS
           value: PLAINTEXT://192.168.56.101:30923
         - name: KAFKA_METRIC_REPORTERS
           value: io.confluent.metrics.reporter.ConfluentMetricsReporter
         - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "3"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
           value: "1"
         - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
           value: "0"
         - name: KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
-          value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
-          value: "1"
-        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
           value: "1"
         - name: KAFKA_JMX_PORT
           value: "9103"
@@ -287,7 +287,7 @@ spec:
         - name: CONFLUENT_SUPPORT_CUSTOMER_ID
           value: 'anonymous'
         ports:
-        - containerPort: 9093
+        - containerPort: 9092
           protocol: TCP
         - containerPort: 9103
           protocol: TCP

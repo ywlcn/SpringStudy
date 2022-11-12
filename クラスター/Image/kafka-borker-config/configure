@@ -11,7 +11,7 @@ then
 fi
 
 template_file="${DOCKER_SEA_TOOL_PATH}server.properties.template"
-output_file="${KAFKA_BROKER_HOME}/config/server.properties"
+output_file="${KAFKA_HOME}/config/server.properties"
 
 ### delete output file if exist
 if [ -e ${output_file} ]; then

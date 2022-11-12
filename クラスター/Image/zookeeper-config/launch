@@ -27,8 +27,8 @@ fi
 #  cat /var/lib/"${COMPONENT}"/data/myid
 #fi
 
-#echo "===> Launching  ...  exec "${ZOOKEEPER_HOME}"/bin/zookeeper-server-start.sh "${ZOOKEEPER_HOME}"/config/zookeeper.properties  "
+#echo "===> Launching  ...  exec "${KAFKA_HOME}"/bin/zookeeper-server-start.sh "${KAFKA_HOME}"/config/zookeeper.properties  "
 #exec "${COMPONENT}"-server-start /etc/kafka/"${COMPONENT}".properties
 
-exec "${ZOOKEEPER_HOME}"/bin/zookeeper-server-start.sh "${ZOOKEEPER_HOME}"/config/zookeeper.properties 
+exec "${KAFKA_HOME}"/bin/zookeeper-server-start.sh "${KAFKA_HOME}"/config/zookeeper.properties 
 

@@ -3,8 +3,8 @@ FROM openjdk:11
 
 
 ## 環境変数
-ENV		KAFKA_BROKER_HOME="/opt/kafka_2.12-3.2.0/"
-ENV		DOCKER_SEA_TOOL_PATH="/opt/docker/"
+ENV		KAFKA_HOME=/opt/kafka/
+ENV		DOCKER_SEA_TOOL_PATH=/opt/docker/
 
 ENV 	KAFKA_BROKER_ID="1"
 ENV 	KAFKA_ZOOKEEPER_CONNECT="kafka-zookeeper:2181"
@@ -15,6 +15,9 @@ ENV 	KAFKA_NUM_PARTITIONS=5
 ENV 	KAFKA_NUM_PARTITIONS=5
 ENV		KAFKA_LOG_PATH="/tmp/sea/kafka-logs/"
 ENV		KAFKA_LISTENERS="PLAINTEXT://:9092"
+ENV		KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+ENV		KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+ENV		KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
 
 #ENV KAFKA_METRIC_REPORTERS=io.confluent.metrics.reporter.ConfluentMetricsReporter
 #ENV KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR="1"
@@ -31,26 +34,38 @@ ENV		KAFKA_LISTENERS="PLAINTEXT://:9092"
 #ENV CONFLUENT_METRICS_ENABLE='false'
 #ENV CONFLUENT_SUPPORT_CUSTOMER_ID='anonymous'
 
-ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
+
+WORKDIR /opt
+
+## ファイルダウンロード
+RUN cd /opt
+RUN curl https://archive.apache.org/dist/kafka/3.1.1/kafka_2.12-3.1.1.tgz -o /opt/kafka.tgz 
+RUN ls 
+RUN pwd
+RUN pwd /opt
+RUN tar -xzvf /opt/kafka.tgz 
+RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}
+
+
 COPY 	setup/run						${DOCKER_SEA_TOOL_PATH}
 
-CMD		mkdir -p 										${DOCKER_SEA_TOOL_PATH}
+RUN		mkdir -p 										${DOCKER_SEA_TOOL_PATH}
 COPY 	kafka-borker-config/configure 					${DOCKER_SEA_TOOL_PATH}
 COPY 	kafka-borker-config/launch						${DOCKER_SEA_TOOL_PATH}
 COPY 	kafka-borker-config/server.properties.template 	${DOCKER_SEA_TOOL_PATH}server.properties.template
 
 
-CMD		mkdir -p 								${KAFKA_LOG_PATH}
-CMD     chmod 777 -R   ${KAFKA_LOG_PATH}		${DOCKER_SEA_TOOL_PATH}
+RUN		mkdir -p 								${KAFKA_LOG_PATH}
+RUN     chmod 777 -R   ${KAFKA_LOG_PATH}		${DOCKER_SEA_TOOL_PATH}
 
 # 
 EXPOSE 9092
 
 
-WORKDIR ${KAFKA_BROKER_HOME}
+WORKDIR ${KAFKA_HOME}
 
 #CMD	/bin/tail -f /dev/null
 
-#CMD ${KAFKA_BROKER_HOME}/bin/kafka-server-start.sh ${KAFKA_BROKER_HOME}/config/server.properties 
+#CMD ${KAFKA_HOME}/bin/kafka-server-start.sh ${KAFKA_HOME}/config/server.properties 
 CMD ["/opt/docker/run"]
 
