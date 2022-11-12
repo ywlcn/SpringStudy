@@ -1,0 +1,117 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-broker-logs-001
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-broker-logs-001
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-broker-logs-002
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-broker-logs-002
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+---
+
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-broker-logs-003
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-broker-logs-003
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-zookeeper-logs
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-zookeeper-logs
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-web-app-logs
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-web-app-logs
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: kafka-connect-logs
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: kafka-connect-logs
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 100Mi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: prometheus-data
+spec:
+  selector: 
+    matchLabels:
+      type: local-hdd
+  storageClassName: prometheus-data
+  volumeMode: Filesystem
+  accessModes:
+    - ReadWriteMany
+  resources:
+    requests:
+      storage: 500Mi
+
+
+

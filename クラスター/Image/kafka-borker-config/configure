@@ -1,0 +1,29 @@
+#!/usr/bin/env bash
+#
+# read info from env ,and set them to config
+
+if [[ -n "${KAFKA_JMX_OPTS-}" ]]
+then
+  if [[ ! $KAFKA_JMX_OPTS == *"com.sun.management.jmxremote.rmi.port"*  ]]
+  then
+    echo "KAFKA_JMX_OPTS should contain 'com.sun.management.jmxremote.rmi.port' property. It is required for accessing the JMX metrics externally."
+  fi
+fi
+
+template_file="${DOCKER_SEA_TOOL_PATH}server.properties.template"
+output_file="${KAFKA_BROKER_HOME}/config/server.properties"
+
+### delete output file if exist
+if [ -e ${output_file} ]; then
+  rm -rf  ${output_file}
+fi
+
+### eval enviroment variable
+cat ${template_file} | while read line
+do
+  eval  echo   ${line} >>  ${output_file}
+done
+
+
+
+

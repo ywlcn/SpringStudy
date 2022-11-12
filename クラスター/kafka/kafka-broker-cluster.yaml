@@ -1,0 +1,302 @@
+### broker ###
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker-1
+spec:
+  selector:
+    app: kafka-broker-1
+  type: NodePort
+  ports:
+    - port: 9091
+      targetPort: 9091
+      nodePort: 30921
+      name: kafka
+#  ports:
+#    - port: 9101
+#      targetPort: 9101
+#      nodePort: 30901
+#      name: jmx
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-broker-1
+  labels:
+    app: kafka-broker-1
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-broker-1
+  template:
+    metadata:
+      labels:
+        app: kafka-broker-1
+    spec:
+      containers:
+      - name: broker1
+        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: log-volume
+          mountPath: /opt/kafka_2.12-3.2.0/logs
+        #resources:
+        #  limits:
+        #    cpu: 1000m
+        #    memory: 2Gi
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "1"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "kafka-zookeeper:2181"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        - name: KAFKA_LISTENERS
+          value: PLAINTEXT://localhost:9091
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: PLAINTEXT://192.168.56.101:30921
+        - name: KAFKA_METRIC_REPORTERS
+          value: io.confluent.metrics.reporter.ConfluentMetricsReporter
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        - name: KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_JMX_PORT
+          value: "9101"
+        - name: KAFKA_JMX_HOSTNAME
+          value: localhost
+        - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
+          value: http://schema-registry:8081
+        - name: CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS
+          value: broker:29091
+        - name: CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS
+          value: "1"
+        - name: CONFLUENT_METRICS_ENABLE
+          value: 'false'
+        - name: CONFLUENT_SUPPORT_CUSTOMER_ID
+          value: 'anonymous'
+        ports:
+        - containerPort: 9091
+          protocol: TCP
+        - containerPort: 9101
+          protocol: TCP
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      volumes:
+      - name: log-volume
+        persistentVolumeClaim:
+          claimName: kafka-broker-logs-001
+
+---
+
+### broker ###
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker-2
+spec:
+  selector:
+    app: kafka-broker-2
+  type: NodePort
+  ports:
+    - port: 9092
+      targetPort: 9092
+      nodePort: 30922
+      name: kafka
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-broker-2
+  labels:
+    app: kafka-broker-2
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-broker-2
+  template:
+    metadata:
+      labels:
+        app: kafka-broker-2
+    spec:
+      containers:
+      - name: broker-2
+        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: log-volume
+          mountPath: /opt/kafka_2.12-3.2.0/logs
+        #resources:
+        #  limits:
+        #    cpu: 1000m
+        #    memory: 2Gi
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "2"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "kafka-zookeeper:2181"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        - name: KAFKA_LISTENERS
+          value: PLAINTEXT://localhost:9092
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: PLAINTEXT://192.168.56.101:30922
+        - name: KAFKA_METRIC_REPORTERS
+          value: io.confluent.metrics.reporter.ConfluentMetricsReporter
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        - name: KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_JMX_PORT
+          value: "9102"
+        - name: KAFKA_JMX_HOSTNAME
+          value: localhost
+        - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
+          value: http://schema-registry:8081
+        - name: CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS
+          value: broker:29092
+        - name: CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS
+          value: "1"
+        - name: CONFLUENT_METRICS_ENABLE
+          value: 'false'
+        - name: CONFLUENT_SUPPORT_CUSTOMER_ID
+          value: 'anonymous'
+        ports:
+        - containerPort: 9092
+          protocol: TCP
+        - containerPort: 9102
+          protocol: TCP
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      volumes:
+      - name: log-volume
+        persistentVolumeClaim:
+          claimName: kafka-broker-logs-002
+
+---
+
+### broker ###
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-broker-3
+spec:
+  selector:
+    app: kafka-broker-3
+  type: NodePort
+  ports:
+    - port: 9093
+      targetPort: 9093
+      nodePort: 30923
+      name: kafka
+
+---
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-broker-3
+  labels:
+    app: kafka-broker-3
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-broker-3
+  template:
+    metadata:
+      labels:
+        app: kafka-broker-3
+    spec:
+      containers:
+      - name: broker-3
+        image: nexus.vbox.local:9001/sea-kafka-broker:latest
+        imagePullPolicy: IfNotPresent
+        volumeMounts:
+        - name: log-volume
+          mountPath: /opt/kafka_2.12-3.2.0/logs
+        #resources:
+        #  limits:
+        #    cpu: 1000m
+        #    memory: 2Gi
+        env:
+        - name: KAFKA_BROKER_ID
+          value: "3"
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "kafka-zookeeper:2181"
+        - name: KAFKA_LISTENER_SECURITY_PROTOCOL_MAP
+          value: PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+        - name: KAFKA_LISTENERS
+          value: PLAINTEXT://localhost:9093
+        - name: KAFKA_ADVERTISED_LISTENERS
+          value: PLAINTEXT://192.168.56.101:30923
+        - name: KAFKA_METRIC_REPORTERS
+          value: io.confluent.metrics.reporter.ConfluentMetricsReporter
+        - name: KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
+          value: "0"
+        - name: KAFKA_CONFLUENT_LICENSE_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_MIN_ISR
+          value: "1"
+        - name: KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR
+          value: "1"
+        - name: KAFKA_JMX_PORT
+          value: "9103"
+        - name: KAFKA_JMX_HOSTNAME
+          value: localhost
+        - name: KAFKA_CONFLUENT_SCHEMA_REGISTRY_URL
+          value: http://schema-registry:8081
+        - name: CONFLUENT_METRICS_REPORTER_BOOTSTRAP_SERVERS
+          value: broker:29092
+        - name: CONFLUENT_METRICS_REPORTER_TOPIC_REPLICAS
+          value: "1"
+        - name: CONFLUENT_METRICS_ENABLE
+          value: 'false'
+        - name: CONFLUENT_SUPPORT_CUSTOMER_ID
+          value: 'anonymous'
+        ports:
+        - containerPort: 9093
+          protocol: TCP
+        - containerPort: 9103
+          protocol: TCP
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
+      volumes:
+      - name: log-volume
+        persistentVolumeClaim:
+          claimName: kafka-broker-logs-003
+

@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#
+# read info from env ,and set them to config
+
+# myid is required for clusters
+#if [[ -n "${ZOOKEEPER_SERVERS-}" ]]
+#then
+#  dub ensure ZOOKEEPER_SERVER_ID
+#  export ZOOKEEPER_INIT_LIMIT=${ZOOKEEPER_INIT_LIMIT:-"10"}
+#  export ZOOKEEPER_SYNC_LIMIT=${ZOOKEEPER_SYNC_LIMIT:-"5"}
+#fi
+
+#if [[ -n "${ZOOKEEPER_SERVER_ID-}" ]]
+#then
+#  dub template "/etc/confluent/docker/myid.template" "/var/lib/${COMPONENT}/data/myid"
+#fi
+
+if [[ -n "${KAFKA_JMX_OPTS-}" ]]
+then
+  if [[ ! $KAFKA_JMX_OPTS == *"com.sun.management.jmxremote.rmi.port"*  ]]
+  then
+    echo "KAFKA_JMX_OPTS should contain 'com.sun.management.jmxremote.rmi.port' property. It is required for accessing the JMX metrics externally."
+  fi
+fi
+
+#dub template "/opt/docker/zookeeper.properties.template" "${ZOOKEEPER_HOME}/config/zookeeper.properties"
+#${DOCKER_SEA_TOOL_PATH}config.sh "${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template" "${ZOOKEEPER_HOME}/config/zookeeper.properties"
+
+template_file="${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template"
+output_file="${ZOOKEEPER_HOME}/config/zookeeper.properties"
+
+### delete output file if exist
+if [ -e ${output_file} ]; then
+  rm -rf  ${output_file}
+fi
+
+### eval enviroment variable
+cat ${template_file} | while read line
+do
+  eval  echo   ${line} >>  ${output_file}
+done
+
+
+
+

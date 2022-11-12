@@ -1,0 +1,43 @@
+FROM openjdk:11
+ 
+
+
+## ä¬ã´ïœêî
+ENV		ZOOKEEPER_HOME="/opt/kafka_2.12-3.2.0/"
+ENV		DOCKER_SEA_TOOL_PATH="/opt/docker/"
+
+ENV		ZOOKEEPER_CLIENT_PORT="2181"
+ENV		ZOOKEEPER_ADMIN_PORT="8080"
+ENV		ZOOKEEPER_DATA_PATH="/var/lib/zookeeper/data"
+ENV		ZOOKEEPER_LOG_PATH="/var/lib/zookeeper/log"
+
+ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
+COPY 	setup/run						${DOCKER_SEA_TOOL_PATH}
+
+CMD		mkdir -p 										${DOCKER_SEA_TOOL_PATH}
+COPY 	zookeeper-config/configure 						${DOCKER_SEA_TOOL_PATH}
+COPY 	zookeeper-config/launch							${DOCKER_SEA_TOOL_PATH}
+COPY 	zookeeper-config/zookeeper.properties.template 	${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template
+
+
+CMD		mkdir -p 								${ZOOKEEPER_DATA_PATH}
+CMD		mkdir -p 								${ZOOKEEPER_LOG_PATH}
+CMD     chmod 777 -R   ${ZOOKEEPER_DATA_PATH}   ${ZOOKEEPER_LOG_PATH}	${DOCKER_SEA_TOOL_PATH}
+
+# 
+EXPOSE 8080
+# 
+EXPOSE 2181
+
+
+WORKDIR ${ZOOKEEPER_HOME}
+
+#ENTRYPOINT [".\bin\windows\zookeeper-server-start.bat" , ".\config\zookeeper.properties"]
+
+#CMD	/bin/tail -f /dev/null
+
+#CMD ${ZOOKEEPER_HOME}/bin/zookeeper-server-start.sh ${ZOOKEEPER_HOME}/config/zookeeper.properties 
+CMD ["/opt/docker/run"]
+
+### https://qiita.com/soushiy/items/f4d2d91d7ac79669e0dd
+

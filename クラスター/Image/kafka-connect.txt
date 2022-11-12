@@ -1,0 +1,34 @@
+FROM openjdk:11
+
+
+## ä¬ã´ïœêî
+ENV		KAFKA_HOME="/opt/kafka/"
+ENV		DOCKER_SEA_TOOL_PATH="/opt/docker/"
+
+ENV		KAFKA_CONNECT_REST_PORT="8084"
+ENV		KAFKA_CONNECT_LOG_PATH="/opt/kafka/logs"
+
+ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
+CMD		mv /opt/kafka_2.12-3.2.0		${KAFKA_HOME}
+COPY 	setup/run						${DOCKER_SEA_TOOL_PATH}
+
+CMD		mkdir -p 												${DOCKER_SEA_TOOL_PATH}
+COPY 	kafka-connect-config/configure 							${DOCKER_SEA_TOOL_PATH}
+COPY 	kafka-connect-config/launch								${DOCKER_SEA_TOOL_PATH}
+COPY 	kafka-connect-config/kafka_connect.properties.template 	${DOCKER_SEA_TOOL_PATH}KAFKA_CONNECT.properties.template
+
+
+CMD		mkdir -p -m 777		{KAFKA_CONNECT_LOG_PATH}
+CMD     chmod 777 -R   ${KAFKA_CONNECT_DATA_PATH}   ${DOCKER_SEA_TOOL_PATH}
+
+WORKDIR ${KAFKA_CONNECT_HOME}
+
+#ENTRYPOINT [".\bin\windows\KAFKA_CONNECT-server-start.bat" , ".\config\KAFKA_CONNECT.properties"]
+
+#CMD	/bin/tail -f /dev/null
+
+#CMD ${KAFKA_CONNECT_HOME}/bin/KAFKA_CONNECT-server-start.sh ${KAFKA_CONNECT_HOME}/config/KAFKA_CONNECT.properties 
+CMD ["/opt/docker/run"]
+
+### https://qiita.com/soushiy/items/f4d2d91d7ac79669e0dd
+

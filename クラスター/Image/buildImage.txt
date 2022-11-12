@@ -1,0 +1,1 @@
+docker build -f $1 -t sea-$1 --no-cache .

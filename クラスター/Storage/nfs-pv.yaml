@@ -1,0 +1,162 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-broker-logs-001
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-broker-logs-001
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+#    hostPath:
+#      path: /pvdata/pv0001
+#      type: DirectoryOrCreate
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-broker-logs-1
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-broker-logs-002
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-broker-logs-002
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-broker-logs-2
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-broker-logs-003
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-broker-logs-003
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-broker-logs-3
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+---
+
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-zookeeper-logs
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-zookeeper-logs
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-zookeeper-logs
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-web-app-logs
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-web-app-logs
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-web-app-logs
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: kafka-connect-logs
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: kafka-connect-logs
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/kafka-connect-logs
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+    name: prometheus-data
+    labels:
+      type: local-hdd
+spec:
+    capacity:
+        storage: 1Gi
+    storageClassName: prometheus-data
+    volumeMode: Filesystem
+    accessModes:
+        - ReadWriteMany
+    persistentVolumeReclaimPolicy: Retain
+    mountOptions:
+      - hard
+    nfs:
+      # mountするNFSサーバーのディレクトリ
+      path: /tmp/k8svp/prometheus-data
+      # NFSサーバーのホスト
+      server: 192.168.56.100
+
