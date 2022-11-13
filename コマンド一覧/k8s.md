@@ -89,6 +89,10 @@ $ kubectl get pods --selector=app=cassandra -o \
 $ kubectl get configmap myconfig \
   -o jsonpath='{.data.ca\.crt}'
 
+# fluent.confの内容をconfigmapとして作成します。
+$ kubectl create configmap kafka.fluent.conf --from-file=fluent.conf
+$ kubectl get configmap kafka.fluent.conf -o json/yaml
+
 # すべてのワーカーノードを取得します（セレクターを使用して、
 # 「node-role.kubernetes.io/master」という名前のラベルを持つ結果を除外します）
 $ kubectl get node --selector='!node-role.kubernetes.io/master'

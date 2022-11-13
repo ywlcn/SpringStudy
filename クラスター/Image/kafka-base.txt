@@ -1,0 +1,43 @@
+FROM openjdk:11
+ 
+
+
+## 環境変数
+ENV	KAFKA_HOME=/opt/kafka/
+ENV	DOCKER_SEA_TOOL_PATH=/opt/docker/
+ENV	KAFKA_LOG=${KAFKA_HOME}/logs
+ENV	KAFKA_JOLOKIA_PORT=7001
+ENV	KAFKA_JMX_EXPORT_PORT=7002
+ENV	KAFKA_OPTS="-javaagent:/opt/jolokia/jolokia-jvm-1.7.1.jar=port=${KAFKA_JOLOKIA_PORT},host=0.0.0.0"
+
+WORKDIR /opt
+
+## Kafka 本体ファイルダウンロード
+#RUN curl https://archive.apache.org/dist/kafka/3.1.1/kafka_2.12-3.1.1.tgz -o /opt/kafka.tgz 
+#RUN tar -xzvf /opt/kafka.tgz 
+#RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}
+
+ADD setup/kafka_2.12-3.1.1.tgz /opt
+RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}
+
+## そのほかOSSファイルダウンロード
+RUN		mkdir -p -m 777 /opt/jolokia/
+RUN 	curl https://repo1.maven.org/maven2/org/jolokia/jolokia-jvm/1.7.1/jolokia-jvm-1.7.1.jar -o /opt/jolokia/jolokia-jvm-1.7.1.jar
+
+RUN		mkdir -p -m 777 /opt/jmx_exporter/
+RUN 	curl https://repo1.maven.org/maven2/io/prometheus/jmx/jmx_prometheus_javaagent/0.17.2/jmx_prometheus_javaagent-0.17.2.jar -o /opt/jmx_exporter/jmx_prometheus_javaagent-0.17.2.jar
+
+
+
+
+RUN		mkdir -p -m 777	${DOCKER_SEA_TOOL_PATH}
+RUN		mkdir -p -m 777	${KAFKA_LOG}
+COPY 	setup/run		${DOCKER_SEA_TOOL_PATH}
+
+
+WORKDIR ${KAFKA_HOME}
+
+#CMD	/bin/tail -f /dev/null
+
+CMD ["/opt/docker/run"]
+

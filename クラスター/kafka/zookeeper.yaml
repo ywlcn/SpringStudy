@@ -35,7 +35,7 @@ spec:
       containers:
       - name: zookeeper
         image: nexus.vbox.local:9001/sea.zookeeper:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: log-volume
           mountPath: /opt/kafka/logs

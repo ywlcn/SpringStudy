@@ -1,0 +1,19 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: kafka-flanneld
+  labels:
+    app: kafka-flanneld
+spec:
+  containers:
+  - name: kafka-flanneld
+    image: nexus.vbox.local:9001/sea.kafka-fluent:latest
+    imagePullPolicy: Always
+    volumeMounts:
+    - name: fluent-conf
+      mountPath: /fluentd/etc/
+  volumes:
+    - name: fluent-conf
+      configMap:
+        name: kafka.fluent.conf
+

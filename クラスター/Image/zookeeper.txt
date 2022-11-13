@@ -1,37 +1,22 @@
-FROM openjdk:11
+FROM sea.kafka-base:latest
  
 
 
 ## 環境変数
-ENV		KAFKA_HOME=/opt/kafka/
-ENV		DOCKER_SEA_TOOL_PATH=/opt/docker/
+#ENV	KAFKA_HOME=/opt/kafka/
+#ENV	DOCKER_SEA_TOOL_PATH=/opt/docker/
 ENV		ZOOKEEPER_CLIENT_PORT="2181"
 ENV		ZOOKEEPER_ADMIN_PORT="8080"
 ENV		ZOOKEEPER_DATA_PATH="/var/lib/zookeeper"
-ENV		ZOOKEEPER_LOG_PATH=${KAFKA_HOME}/logs
 
 WORKDIR /opt
 
-## ファイルダウンロード
-RUN cd /opt
-RUN curl https://archive.apache.org/dist/kafka/3.1.1/kafka_2.12-3.1.1.tgz -o /opt/kafka.tgz 
-RUN ls 
-RUN pwd
-RUN pwd /opt
-RUN tar -xzvf /opt/kafka.tgz 
-RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}
-
-
-RUN		mkdir -p 										${DOCKER_SEA_TOOL_PATH}
 COPY 	zookeeper-config/configure 						${DOCKER_SEA_TOOL_PATH}
 COPY 	zookeeper-config/launch							${DOCKER_SEA_TOOL_PATH}
 COPY 	zookeeper-config/zookeeper.properties.template 	${DOCKER_SEA_TOOL_PATH}zookeeper.properties.template
-COPY 	setup/run										${DOCKER_SEA_TOOL_PATH}
 
 RUN		mkdir -p -m 777		${ZOOKEEPER_DATA_PATH}/data
 RUN		mkdir -p -m 777		${ZOOKEEPER_DATA_PATH}/log
-RUN		mkdir -p -m 777		${ZOOKEEPER_LOG_PATH}
-RUN     chmod 777 -R        ${DOCKER_SEA_TOOL_PATH}
 
 
 WORKDIR ${KAFKA_HOME}

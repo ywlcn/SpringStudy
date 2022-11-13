@@ -1,44 +1,55 @@
-FROM openjdk:11
+FROM sea.kafka-base:latest
 
 
 ## 環境変数
-ENV		KAFKA_HOME="/opt/kafka/"
-ENV		DOCKER_SEA_TOOL_PATH="/opt/docker/"
 
-ENV		KAFKA_CONNECT_REST_PORT="8084"
-ENV		KAFKA_CONNECT_LOG_PATH="/opt/kafka/logs"
+ENV	KAFKA_CONNECT_REST_PORT="8084"
+ENV	KAFKA_CONNECT_LOG_PATH="/opt/kafka/logs"
+ENV	KAFKA_BOOTSTRAP_SERVERS="localhost:9092"
+
+ENV	KAFKA_CONNECTOR_NAME="confluent-db-source"
+
+ENV	KAFKA_CONNECTOR_CLASS="io.confluent.connect.jdbc.JdbcSourceConnector"
+ENV	KAFKA_CONNECTOR_TASKS_MAX="1"
+
+ENV	KAFKA_CONNECTOR_CONNECTION_URL="jdbc:postgresql://localhost:5432/postgres"
+ENV	KAFKA_CONNECTOR_CONNECTION_USER="postgres"
+ENV	KAFKA_CONNECTOR_CONNECTION_PASSWORD="p@ssw0rd"
+
+ENV	KAFKA_CONNECTOR_MODE="timestamp+incrementing"
+ENV	KAFKA_CONNECTOR_TABLE_WHITELIST="eventinfo"
+ENV	KAFKA_CONNECTOR_QUERY=""
+
+ENV	KAFKA_CONNECTOR_TIMESTAMP_COLUMN_NAME="createTime"
+ENV	KAFKA_CONNECTOR_INCREMENTING_COLUMN_NAME="id"
+
+ENV	KAFKA_CONNECTOR_TOPIC_PREFIX="kafka-connect-confluent"
+ENV	KAFKA_CONNECTOR_POLL_INTERVAL_MS="1000"
+
+ENV	KAFKA_CONNECTOR_TRANSFORMS_INFO="transforms=ValueToKey\ntransforms.ValueToKey.type=org.apache.kafka.connect.transforms.ValueToKey\ntransforms.ValueToKey.fields=kafka_key\n"
+
+RUN		mkdir -p 						${DOCKER_SEA_TOOL_PATH}
+COPY 	kafka-connect-config/configure 	${DOCKER_SEA_TOOL_PATH}
+COPY 	kafka-connect-config/launch		${DOCKER_SEA_TOOL_PATH}
+
+COPY 	kafka-connect-config/connect-standalone.properties.template 		${DOCKER_SEA_TOOL_PATH}connect-standalone.properties.template
+COPY 	kafka-connect-config/connect-jdbc-source.properties.template		${DOCKER_SEA_TOOL_PATH}connect-jdbc-source.properties.template
 
 
-## ファイルダウンロード
-RUN cd /opt
-RUN curl https://archive.apache.org/dist/kafka/3.1.1/kafka_2.12-3.1.1.tgz -o /opt/kafka.tgz 
-RUN ls 
-RUN pwd
-RUN pwd /opt
-RUN tar -xzvf /opt/kafka.tgz 
+RUN		mkdir -p -m 777	${KAFKA_CONNECT_LOG_PATH}
+RUN     chmod 777 -R   	${KAFKA_CONNECT_DATA_PATH}   ${DOCKER_SEA_TOOL_PATH}
 
+## そのほかOSSファイルダウンロード
+RUN curl https://packages.confluent.io/maven/io/confluent/kafka-connect-jdbc/10.6.0/kafka-connect-jdbc-10.6.0.jar -o ${KAFKA_HOME}/libs/kafka-connect-jdbc-10.6.0.jar
+RUN curl https://repo1.maven.org/maven2/org/postgresql/postgresql/42.5.0/postgresql-42.5.0.jar -o ${KAFKA_HOME}/libs/postgresql-42.5.0.jar
 
-
-RUN mv /opt/kafka_2.12-3.1.1 ${KAFKA_HOME}ADD 	setup/kafka_2.12-3.2.0.tar 		/opt/
-CMD		mv /opt/kafka_2.12-3.2.0		${KAFKA_HOME}
-COPY 	setup/run						${DOCKER_SEA_TOOL_PATH}
-
-CMD		mkdir -p 												${DOCKER_SEA_TOOL_PATH}
-COPY 	kafka-connect-config/configure 							${DOCKER_SEA_TOOL_PATH}
-COPY 	kafka-connect-config/launch								${DOCKER_SEA_TOOL_PATH}
-COPY 	kafka-connect-config/kafka_connect.properties.template 	${DOCKER_SEA_TOOL_PATH}KAFKA_CONNECT.properties.template
-
-
-CMD		mkdir -p -m 777		{KAFKA_CONNECT_LOG_PATH}
-CMD     chmod 777 -R   ${KAFKA_CONNECT_DATA_PATH}   ${DOCKER_SEA_TOOL_PATH}
-
-WORKDIR ${KAFKA_CONNECT_HOME}
+WORKDIR ${KAFKA_HOME}
 
 #ENTRYPOINT [".\bin\windows\KAFKA_CONNECT-server-start.bat" , ".\config\KAFKA_CONNECT.properties"]
 
 #CMD	/bin/tail -f /dev/null
 
-#CMD ${KAFKA_CONNECT_HOME}/bin/KAFKA_CONNECT-server-start.sh ${KAFKA_CONNECT_HOME}/config/KAFKA_CONNECT.properties 
+#CMD ${KAFKA_HOME}/bin/KAFKA_CONNECT-server-start.sh ${KAFKA_CONNECT_HOME}/config/KAFKA_CONNECT.properties 
 CMD ["/opt/docker/run"]
 
 ### https://qiita.com/soushiy/items/f4d2d91d7ac79669e0dd

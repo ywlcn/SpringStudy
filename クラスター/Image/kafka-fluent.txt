@@ -1,0 +1,48 @@
+##########FROM fluent/fluentd:v1.15-1
+###########FROM fluent/fluentd:v1.15-debian-1
+##########
+########### Use root account to use apk
+##########USER root
+##########
+##########RUN apk add curl
+##########
+##########
+########### below RUN includes plugin as examples elasticsearch is not required
+########### you may customize including plugins as you wish
+##########RUN apk add --no-cache --update --virtual .build-deps build-base ruby-dev 
+###########RUN gem install fluent-plugin-elasticsearch 
+##########RUN gem install fluent-plugin-kafka --no-document 
+##########RUN gem install fluent-plugin-influxdb
+##########RUN gem sources --clear-all 
+##########RUN apk del .build-deps 
+##########RUN rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
+##########
+##########USER fluent
+
+
+
+
+FROM fluent/fluentd:v1.15-debian-1
+
+# Use root account to use apt
+USER root
+
+# below RUN includes plugin as examples elasticsearch is not required
+# you may customize including plugins as you wish
+RUN buildDeps=" make gcc g++ libc-dev" 
+RUN apt-get update 
+RUN apt-get install -y --no-install-recommends $buildDeps 
+RUN  gem install fluent-plugin-elasticsearch --no-document 
+RUN gem install fluent-plugin-kafka --no-document 
+RUN gem install fluent-plugin-influxdb --no-document 
+RUN  gem sources --clear-all 
+RUN  SUDO_FORCE_REMOVE=yes 
+RUN apt-get purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false $buildDeps 
+RUN rm -rf /var/lib/apt/lists/* 
+RUN rm -rf /tmp/* /var/tmp/* /usr/lib/ruby/gems/*/cache/*.gem
+
+#COPY fluent.conf /fluentd/etc/cd 
+#COPY entrypoint.sh /bin/
+
+USER fluent
+

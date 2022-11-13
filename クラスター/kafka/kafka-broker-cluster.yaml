@@ -8,15 +8,14 @@ spec:
     app: kafka-broker-1
   type: NodePort
   ports:
-    - port: 9092
+    - name: kafka
+      port: 9092
       targetPort: 9092
       nodePort: 30921
-      name: kafka
-#  ports:
-#    - port: 9101
-#      targetPort: 9101
-#      nodePort: 30901
-#      name: jmx
+    - name: jmx
+      port: 7001
+      targetPort: 7001
+      nodePort: 30911
 
 ---
 
@@ -39,7 +38,7 @@ spec:
       containers:
       - name: broker1
         image: nexus.vbox.local:9001/sea.kafka-broker:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: log-volume
           mountPath: /opt/kafka/logs
@@ -72,6 +71,8 @@ spec:
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
           value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "3"
         - name: KAFKA_JMX_PORT
           value: "9103"
         - name: KAFKA_JMX_HOSTNAME
@@ -89,7 +90,7 @@ spec:
         ports:
         - containerPort: 9092
           protocol: TCP
-        - containerPort: 9101
+        - containerPort: 7001
           protocol: TCP
       dnsConfig:
         options:
@@ -112,10 +113,14 @@ spec:
     app: kafka-broker-2
   type: NodePort
   ports:
-    - port: 9092
+    - name: kafka
+      port: 9092
       targetPort: 9092
       nodePort: 30922
-      name: kafka
+    - name: jmx
+      port: 7001
+      targetPort: 7001
+      nodePort: 30912
 
 ---
 
@@ -139,7 +144,7 @@ spec:
       containers:
       - name: broker-2
         image: nexus.vbox.local:9001/sea.kafka-broker:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: log-volume
           mountPath: /opt/kafka/logs
@@ -172,6 +177,8 @@ spec:
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
           value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "3"
         - name: KAFKA_JMX_PORT
           value: "9103"
         - name: KAFKA_JMX_HOSTNAME
@@ -189,7 +196,7 @@ spec:
         ports:
         - containerPort: 9092
           protocol: TCP
-        - containerPort: 9102
+        - containerPort: 7001
           protocol: TCP
       dnsConfig:
         options:
@@ -212,11 +219,14 @@ spec:
     app: kafka-broker-3
   type: NodePort
   ports:
-    - port: 9092
+    - name: kafka
+      port: 9092
       targetPort: 9092
       nodePort: 30923
-      name: kafka
-
+    - name: jmx
+      port: 7001
+      targetPort: 7001
+      nodePort: 30913
 ---
 
 
@@ -239,7 +249,7 @@ spec:
       containers:
       - name: broker-3
         image: nexus.vbox.local:9001/sea.kafka-broker:latest
-        imagePullPolicy: IfNotPresent
+        imagePullPolicy: Always
         volumeMounts:
         - name: log-volume
           mountPath: /opt/kafka/logs
@@ -272,6 +282,8 @@ spec:
           value: "1"
         - name: KAFKA_CONFLUENT_BALANCER_TOPIC_REPLICATION_FACTOR
           value: "1"
+        - name: KAFKA_NUM_PARTITIONS
+          value: "3"
         - name: KAFKA_JMX_PORT
           value: "9103"
         - name: KAFKA_JMX_HOSTNAME
@@ -289,7 +301,7 @@ spec:
         ports:
         - containerPort: 9092
           protocol: TCP
-        - containerPort: 9103
+        - containerPort: 7001
           protocol: TCP
       dnsConfig:
         options:

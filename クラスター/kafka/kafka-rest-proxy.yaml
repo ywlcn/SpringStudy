@@ -1,0 +1,50 @@
+### broker ###
+apiVersion: v1
+kind: Service
+metadata:
+  name: kafka-rest-proxy
+spec:
+  selector:
+    app: kafka-rest-proxy
+  type: NodePort
+  ports:
+    - port: 8082
+      targetPort: 8082
+      nodePort: 30931
+      name: kafka
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kafka-rest-proxy
+  labels:
+    app: kafka-rest-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kafka-rest-proxy
+  template:
+    metadata:
+      labels:
+        app: kafka-rest-proxy
+    spec:
+      containers:
+      - name: broker1
+        image: confluentinc/cp-kafka-rest:latest
+        imagePullPolicy: IfNotPresent
+        env:
+        - name: KAFKA_ZOOKEEPER_CONNECT
+          value: "kafka-zookeeper:2181"
+        - name: KAFKA_REST_LISTENERS
+          value: "http://0.0.0.0:8082"
+        - name: KAFKA_REST_BOOTSTRAP_SERVERS
+          value: 192.168.56.101:30921
+        ports:
+        - containerPort: 8082
+          protocol: TCP
+      dnsConfig:
+        options:
+        - name: ndots
+          value: "1"
