@@ -24,10 +24,10 @@
 | k8s-node1.vbox.local                                    | 192.168.56.101 | 10.0.2.21 |      |
 | k8s-node2.vbox.local                                    | 192.168.56.102 | 10.0.2.22 |      |
 | k8s-node3.vbox.local                                    | 192.168.56.103 | 10.0.2.23 |      |
-| gitlab.vbox.local<br/>root/123456789<br/>ramee/12345678 | 192.168.56.111 | 10.0.2.31 |      |
+| gitlab.vbox.local<br/>root/123456789<br/>user/12345678 | 192.168.56.111 | 10.0.2.31 |      |
 | nexus.vbox.local                                        | 192.168.56.112 | 10.0.2.32 |      |
 
-※ 認証情報：ramee/123456  root/123456
+※ 認証情報user/123456  root/123456
 
 ※ DNS情報
 
@@ -170,7 +170,7 @@ skipx
 services --enabled="chronyd"
 # System timezone
 timezone Asia/Tokyo --isUtc --ntpservers=2.centos.pool.ntp.org,2.centos.pool.ntp.org,2.centos.pool.ntp.org,2.centos.pool.ntp.org
-user --groups=wheel --name=ramee --password=$6$jI5tly7EE.ibOTHa$0fwsMzcVFXIQ4JkYUIvD7PUdrreTmrBCfkHPvMY3GqkXDpwQi4HZFYQ72nqu2lDww1ANK5uApBaCi5Zm/4gNS. --iscrypted --uid=1001 --gid=100
+user --groups=wheel --name=user --password=$6$jI5tly7EE.ibOTHa$0fwsMzcVFXIQ4JkYUIvD7PUdrreTmrBCfkHPvMY3GqkXDpwQi4HZFYQ72nqu2lDww1ANK5uApBaCi5Zm/4gNS. --iscrypted --uid=1001 --gid=100
 
 %post --logfile=/root/ks-post.log
 # wheel user setting sudo
@@ -324,7 +324,7 @@ I1120 22:25:20.991456    1853 token.go:217] [discovery] Failed to request cluste
 - 実施結果
 
 ```bash
-[ramee@k8s-node1 ~]$ sudo kubeadm join 192.168.56.100:6443 --token bz32si.xcpf471mqg1c6s9q --discovery-token-ca-cert-hash sha256:5921f1514155af783d023cbea2b7bd0a94c1a5c8eb2aa75149571353e91f39fe --v 5
+[user@k8s-node1 ~]$ sudo kubeadm join 192.168.56.100:6443 --token bz32si.xcpf471mqg1c6s9q --discovery-token-ca-cert-hash sha256:5921f1514155af783d023cbea2b7bd0a94c1a5c8eb2aa75149571353e91f39fe --v 5
 I1120 22:25:20.930306    1853 join.go:416] [preflight] found NodeName empty; using OS hostname as NodeName
 I1120 22:25:20.930422    1853 initconfiguration.go:116] detected and using CRI socket: unix:///var/run/containerd/containerd.sock
 [preflight] Running pre-flight checks
