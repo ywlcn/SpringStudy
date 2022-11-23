@@ -1,0 +1,5 @@
+server = "https://nexus.vbox.local:8443"
+
+[host."https://nexus.vbox.local:8443"]
+  capabilities = ["pull", "resolve", "push"]
+  ca = "/etc/containerd/certs.d/nexus.vbox.local:8443/nexus.vbox.download.crt" 

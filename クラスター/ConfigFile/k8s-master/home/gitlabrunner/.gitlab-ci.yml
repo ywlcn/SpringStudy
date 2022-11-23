@@ -1,0 +1,156 @@
+
+### ほかのYamlを読み込む
+#include:
+#  - "/XXX/XXXX.yaml"
+
+#image: openjdk:8-jdk
+
+### Public変数を定義する
+variables:
+  ANDROID_COMPILE_SDK: "28"
+  ANDROID_BUILD_TOOLS: "28.0.3"
+  ANDROID_SDK_TOOLS:   "4333796"
+
+#before_script:
+### 一時対策として　/etc/resolv.conf　に内容を追加
+#  - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+#  - echo "nameserver 4.4.4.4" >> /etc/resolv.conf
+#  - cat /etc/resolv.conf
+
+#before_script:
+#  - apt-get --quiet update --yes
+#  - apt-get --quiet install --yes wget tar unzip lib32stdc++6 lib32z1
+#  - wget --quiet --output-document=android-sdk.zip https://dl.google.com/android/repository/sdk-tools-linux-${ANDROID_SDK_TOOLS}.zip
+#  - unzip -d android-sdk-linux android-sdk.zip
+#  - echo y | android-sdk-linux/tools/bin/sdkmanager "platforms;android-${ANDROID_COMPILE_SDK}" >/dev/null
+#  - echo y | android-sdk-linux/tools/bin/sdkmanager "platform-tools" >/dev/null
+#  - echo y | android-sdk-linux/tools/bin/sdkmanager "build-tools;${ANDROID_BUILD_TOOLS}" >/dev/null
+#  - export ANDROID_HOME=$PWD/android-sdk-linux
+#  - export PATH=$PATH:$PWD/android-sdk-linux/platform-tools/
+#  - chmod +x ./gradlew
+#  # temporarily disable checking for EPIPE error and use yes to accept all licenses
+#  - set +o pipefail
+#  - yes | android-sdk-linux/tools/bin/sdkmanager --licenses
+#  - set -o pipefail
+
+stages:
+  - build-module
+  - build-docker-image
+  - start-kafka-cluster
+  - start-kafka-app
+  - print-out-info
+
+build-module-display:   ### この名前はただの名前、パイプラインで表示される  gradle:7.4.1-jdk11-alpine
+  stage: build-module
+  image: gradle:6.9.1-jdk11-alpine
+  variables:
+    LANG: ja_JP.UTF-8
+    LANGUAGE: ja_JP:ja
+    LC_ALL: ja_JP.UTF-8
+  #except:
+  #  - schedules  ### 意味？
+  before_script:
+   # - localedef -f UTF-8 -i ja_JP ja_JP.UTF-8
+    - git submodule sync --recursive
+    - git submodule update --recursive
+
+   ## 一時対策として　/etc/resolv.conf　に内容を追加
+    - echo "nameserver 8.8.8.8" >> /etc/resolv.conf
+    - echo "nameserver 4.4.4.4" >> /etc/resolv.conf
+    - cat /etc/resolv.conf
+
+  script:
+    - echo "実施開始・・・"
+    - | 
+      function error_exit(){
+        echo ""
+        echo "==========================ERROR-START=========================="
+        echo "$1" 1>%2
+        echo "異常終了しました。"
+        echo "==========================ERROR-END============================"
+        echo ""
+        exit 1
+      }
+    # - buildVersion="0.0.1"
+    - |
+        if [ ! -z "$CI_COMMIT_TAG"]; then
+          if [[ "$CI_COMMIT_TAG" =~ "_RELEASE" ]]; then
+            buildVersion=`echo $CI_COMMIT_TAG | sed -e "s/_RELEASE//g"`
+          else
+            buildVersion=$CI_COMMIT_TAG
+          fi
+        fi
+        echo "ビルドバージョン:" ${buildVersion}
+    
+    - gradle booJar -p 99_cicd-sample -x test
+    - ls 99_cicd-sample/build/libs
+
+#   #- gradle uploadArchive ・・・・
+#
+  artifacts:
+    expire_in: 1 day
+    paths:
+      - 99_cicd-sample/build/libs/*.jar
+#     - money-*/build/libs/*.war
+  when: manual
+#  only:
+#    refs:
+#      - tags
+#    variables:
+#      - $CI_COMMIT_TAG =~ /^[0-9]+\.[0-9]+\.[0-9]+[a-z]?_.+$/
+
+
+
+
+build-docker-image-app:
+  stage: build-docker-image
+  image: docker:20.10.16
+  services:
+    - name: docker:20.10.16-dind
+      command: ["--insecure-registry", "nexus.vbox.local:9001" ] 
+      # "--tls=false" , "--host=tcp//0.0.00:2375"
+
+  variables:
+    LANG: ja_JP.UTF-8
+    LANGUAGE: ja_JP:ja
+    LC_ALL: ja_JP.UTF-8
+    # When using dind service, you must instruct Docker to talk with
+    # the daemon started inside of the service. The daemon is available
+    # with a network connection instead of the default
+    # /var/run/docker.sock socket.
+    DOCKER_HOST: tcp://docker:2376
+    #
+    # The 'docker' hostname is the alias of the service container as described at
+    # https://docs.gitlab.com/ee/ci/services/#accessing-the-services.
+    # If you're using GitLab Runner 12.7 or earlier with the Kubernetes executor and Kubernetes 1.6 or earlier,
+    # the variable must be set to tcp://localhost:2376 because of how the
+    # Kubernetes executor connects services to the job container
+    # DOCKER_HOST: tcp://localhost:2376
+    #
+    # Specify to Docker where to create the certificates. Docker
+    # creates them automatically on boot, and creates
+    # `/certs/client` to share between the service and job
+    # container, thanks to volume mount from config.toml
+    DOCKER_TLS_CERTDIR: "/certs"
+    # These are usually specified by the entrypoint, however the
+    # Kubernetes executor doesn't run entrypoints
+    # https://gitlab.com/gitlab-org/gitlab-runner/-/issues/4125
+    DOCKER_TLS_VERIFY: 1
+    DOCKER_CERT_PATH: "$DOCKER_TLS_CERTDIR/client"
+
+  before_script:
+    - cat /etc/hosts
+    - until docker info; do sleep 1; done
+
+  script:
+    - cd env/docker/
+    - pwd 
+    - docker build -f kafka-base.txt -t sea.kafka-base --no-cache .
+    - docker login -u admin -p admin456 nexus.vbox.local:9001
+    - docker tag sea.kafka-base:latest nexus.vbox.local:9001/sea.kafka-base:latest
+    - docker push nexus.vbox.local:9001/sea.kafka-base:latest
+
+  when: manual
+
+
+

@@ -1,0 +1,101 @@
+
+#https://git.stuvus.uni-stuttgart.de/ref-it/public-playground/-/blob/gitlab-runner-debug/docs/executors/kubernetes.md
+
+imagePullPolicy: IfNotPresent
+
+
+gitlabUrl: https://gitlab.vbox.local/
+
+runnerRegistrationToken: "dmX_TeaxxWEaTxhFrNzG"
+
+terminationGracePeriodSeconds: 3600
+
+concurrent: 10
+
+checkInterval: 30
+
+rbac:
+  create: true
+  rules: []
+  clusterWideAccess: false
+  podSecurityPolicy:
+    enabled: false
+    resourceNames:
+    - gitlab-runner
+
+          
+metrics:
+  enabled: false
+  portName: metrics
+  port: 9252
+  serviceMonitor:
+    enabled: false
+
+service:
+  enabled: false
+  type: ClusterIP
+
+certsSecretName: gitlab-secret
+
+runners:
+  config: |
+    [[runners]]
+      name = "Houhx Kubernetes Runner"
+      url = "https://gitlab.vbox.local/ci"
+      clone_url = "https://gitlab.vbox.local"
+      executor = "kubernetes"
+      [runners.kubernetes]
+        image = "ubuntu:20.04"
+        privileged = true
+      [[runners.kubernetes.volumes.empty_dir]]
+        name = "docker-certs"
+        mount_path = "/certs/client"
+        medium = "Memory"
+        [[runners.kubernetes.host_aliases]]
+          ip = "192.168.56.111"
+          hostnames = ["gitlab.vbox.local" , "gitlab.vbox.com"]
+        [[runners.kubernetes.host_aliases]]
+          ip = "192.168.56.100"
+          hostnames = ["k8s-master.vbox.local"]
+        [[runners.kubernetes.host_aliases]]
+          ip = "192.168.56.112"
+          hostnames = ["nexus.vbox.local" , "nexus.vbox.com"]
+
+  cache: {}
+  builds: {}
+  services: {}
+  helpers: {}
+
+securityContext:
+  runAsUser: 100
+  fsGroup: 65533
+
+resources: {}
+
+affinity: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+hostAliases: 
+  - ip: "192.168.56.100"
+    hostnames:
+    - "k8s-master.vbox.local"
+  - ip: "192.168.56.111"
+    hostnames:
+    - "gitlab.vbox.local"
+    - "gitlab.vbox.com"
+  - ip: "192.168.56.112"
+    hostnames:
+    - "nexus.vbox.local"
+    - "nexus.vbox.com"
+
+podAnnotations: {}
+
+podLabels: {}
+
+secrets: []
+
+configMaps: {}
+
