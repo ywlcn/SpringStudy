@@ -584,3 +584,54 @@ Preparing to install helm into /usr/local/bin
 helm installed into /usr/local/bin/helm
 ```
 
+# 5 監視
+
+## 5.1 Pormetheusインストール
+
+```bash
+helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
+helm repo update
+
+helm uninstall prometheus
+
+###デフォルト設定取得  https://github.com/prometheus-community/helm-charts/tree/main/charts
+helm show values prometheus-community/prometheus > prometheus-values.yaml
+helm show values prometheus-community/prometheus-pushgateway > prometheus-pushgateway.yaml
+helm show values prometheus-community/alertmanager > prometheus-alertmanager.yaml
+
+# PVCはなかなかうまくいけないので、一旦ストーレジなしで起動
+helm install prometheus prometheus-community/prometheus -f prometheus-values.yaml
+helm upgrade prometheus prometheus-community/prometheus -f prometheus-values.yaml
+```
+
+## 5.2 Grafana インストール
+
+```bash
+helm repo add grafana https://grafana.github.io/helm-charts
+helm search repo grafana
+
+helm show values grafana/grafana > grafana.yaml
+
+helm install grafana grafana/grafana  -f grafana.yaml
+
+# 認証情報はSecretに存在している
+kubectl get secrets grafana -o jsonpath='{.data.admin-password}' | base64 -d
+kubectl get secrets grafana -o jsonpath='{.data.admin-user}' | base64 -d
+
+
+
+```
+
+## 5.3 KafkaExporter
+
+https://github.com/danielqsj/kafka_exporter
+
+
+
+```bash
+
+
+helm show values prometheus-community/prometheus-kafka-exporter > prometheus-kafka-exporter.yaml
+helm install prometheus-kafka-exporter prometheus-community/prometheus-kafka-exporter -f prometheus-kafka-exporter.yaml
+
+```
