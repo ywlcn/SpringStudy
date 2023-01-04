@@ -17,7 +17,10 @@ $ ./kafka-topics.sh --bootstrap-server=localhost:9092 --create --topic=mytopic
 
  --zookeeper   --->   --bootstrap-server  
 
-
+./kafka-topics.sh --bootstrap-server=localhost:9092 --delete --topic=error-topic
+./kafka-topics.sh --bootstrap-server=localhost:9092 --delete --topic=redirect-topic     
+./kafka-topics.sh --bootstrap-server=localhost:9092 --delete --topic=retry-source-topic 
+./kafka-topics.sh --bootstrap-server=localhost:9092 --delete --topic=source-topic 
 
 #################################Consumer####################################################
 # https://docs.cloudera.com/runtime/7.2.10/kafka-managing/topics/kafka-manage-cli-unsupported.html
@@ -34,7 +37,8 @@ $ ./kafka-delete-records.sh --bootstrap-server localhost:9092  --offset-json-fil
 $ ./kafka-console-producer.sh --bootstrap-server=localhost:9092 --topic=mytopic
 
 
-$ ./kafka-console-consumer.sh --bootstrap-server=localhost:9092 --topic=source-topic --from-beginning
+$ ./kafka-console-consumer.sh --bootstrap-server=localhost:9092 --topic=error-topic --from-beginning
+$ ./kafka-console-consumer.sh --bootstrap-server=localhost:9092 --topic=redirect-topic --from-beginning
 
 
 ```
