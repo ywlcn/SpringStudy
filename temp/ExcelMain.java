@@ -12,7 +12,7 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 public class ExcelMain {
 	
-	// implementation 'org.apache.poi:poi:5.2.3'
+	// implementation 'org.apache.poi:poi:5.2.3'  implementation 'org.apache.poi:poi-ooxml:5.2.3'
 	public static void main(String[] args) throws EncryptedDocumentException, IOException{
 	    // Excelファイルを作成
 	    Workbook outputWorkbook = new XSSFWorkbook();
