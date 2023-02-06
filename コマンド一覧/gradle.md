@@ -1,3 +1,5 @@
+オンラインヘルプ：　https://docs.gradle.org/current/userguide/what_is_gradle.html
+
 
 
 # 1 Gradle実施の構成
@@ -682,13 +684,97 @@ tasks.withType(Javadoc){
   inner
   ```
 
-  
-
-
 
 # 5 Pulish
 
+作成したJarをMavenへアップロードする際に利用する機能。
 
+- 設定例
+
+  ```groovy
+  plugins {
+      id 'java-library'
+      id 'maven-publish'
+      id 'signing'
+  }
+  
+  group = 'com.example'
+  version = '1.0'
+  
+  java {
+      withJavadocJar()
+      withSourcesJar()
+  }
+  
+  publishing {
+      publications {
+          mavenJava(MavenPublication) {
+              artifactId = 'my-library'
+              from components.java
+              versionMapping {
+                  usage('java-api') {
+                      fromResolutionOf('runtimeClasspath')
+                  }
+                  usage('java-runtime') {
+                      fromResolutionResult()
+                  }
+              }
+              pom {
+                  name = 'My Library'
+                  description = 'A concise description of my library'
+                  url = 'http://www.example.com/library'
+                  properties = [
+                      myProp: "value",
+                      "prop.with.dots": "anotherValue"
+                  ]
+                  licenses {
+                      license {
+                          name = 'The Apache License, Version 2.0'
+                          url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                      }
+                  }
+                  developers {
+                      developer {
+                          id = 'johnd'
+                          name = 'John Doe'
+                          email = 'john.doe@example.com'
+                      }
+                  }
+                  scm {
+                      connection = 'scm:git:git://example.com/my-library.git'
+                      developerConnection = 'scm:git:ssh://example.com/my-library.git'
+                      url = 'http://example.com/my-library/'
+                  }
+              }
+          }
+      }
+  
+      repositories {
+          maven {
+              url 'http://nexus.vbox.local:8081/repository/ramee-maven-host/'
+            	credentials {
+          		username = "admin"
+          		password = "admin456"
+        		}
+          }
+      }
+      
+      
+  }
+  
+  signing {
+      sign publishing.publications.mavenJava
+  }
+  
+  
+  javadoc {
+      if(JavaVersion.current().isJava9Compatible()) {
+          options.addBooleanOption('html5', true)
+      }
+  }
+  ```
+
+  
 
 
 
@@ -848,7 +934,7 @@ configure(subprojects.findAll {it.name != 'tropicalFish'}) {
 - デバッグ
 
   ```bash
-  gradle551 help -Dorg.gradle.debug=true
+  gradle help -Dorg.gradle.debug=true
   ```
 
   5005ポートを利用している
