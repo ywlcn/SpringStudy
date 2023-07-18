@@ -1,0 +1,32 @@
+apiVersion: v1                  ## Required
+kind: Service                   ## Required
+metadata :                      ## Required
+  name: string                  ## Required,Service名称
+  namespace: string             ## Required,命名空间,默认为default
+  labels :                      ##自定义标签属性列表
+  - name : string
+  annotations :                 ##自定义注解属性列表
+  - name: string
+spec:                         ## Required,详细描述
+  selector: []               ## Required,label Selector配置,将选择具有指定Label标签得Pod作为管理范围
+  type: string              ## Required,Service的类型,指定Service的访问方式,默认为ClusterIP
+  clusterIP: string         ## 虚拟服务IP地址，当type=ClusterIP时，如果不指定，则系统进行自动分配，也可以手工指定，当type=LoadBalancer时，需要指定
+  sessionAffinity: string   ## 是否支持session，可选值为ClientIP，默认值为None，ClientIP：表示将同一个客户端的访问请求都转发到同一个后端Pod
+  ports :                   ## Service端口列表
+  - name: string            ## 端口名称
+    protocol: string        ## 端口协议，支持TCP和UDP，默认为TCP
+    port: int               ## 服务监听端口号
+    targetPort: int         ## 需要转发到后端Pod的端口号
+    nodePort: int           ## 当spec.type=NodePort时，指定映射到宿主机的端口号
+status:                     ## 当spec.type=LoadBalancer时，设置外部负载均衡器的地址，用于公有云环境
+  loadBalancer:             ## 外部负载均衡器
+    ingress:                ## 外部负载均衡器
+      ip: string            ## 外部负载均衡器的IP地址
+      hostname: string      ## 外部负载均衡器的主机名\
+
+
+spc.type 的其他值及类型
+ClusterIP：虚拟服务IP地址，该地址用于Kubernetes集群内部的Pod访问，在Node上kube-proxy通过设置的iptables规则进行转发
+NodePort：使用宿主机的端口，使能够访问各Node的外部客户端通过Node的IP地址和端口号就能访问服务
+LoadBalancer：使用外接负载均衡器完成到服务的负载分发，需要在 spc,status.loadBalancer 字段指定外部负载均衡器的IP地址，同时定义nodePort和clusterIP，用于公有云环境
+
