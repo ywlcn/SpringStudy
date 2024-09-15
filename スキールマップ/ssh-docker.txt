@@ -1,0 +1,19 @@
+FROM oraclelinux:8.8
+
+
+#RUN yum install -y passwd && \
+#yum install -y openssh-server  ssh-keygen && \
+RUN echo '88888888' | passwd root --stdin
+
+#创建ssh-keygen创建相关的ssh文件，-q的意思是静默模式（就是默认是需要让你回车输入的，加上这个直接跳过）
+RUN ssh-keygen -t rsa -f /etc/ssh/ssh_host_rsa_key -N "" -q && \
+ssh-keygen -t ecdsa -f /etc/ssh/ssh_host_ecdsa_key -N "" -q && \
+ssh-keygen -t ed25519 -f /etc/ssh/ssh_host_ed25519_key -N "" -q
+
+#RUN systemctl enable sshd
+# 开启sshd服务，并用tail来前台执行阻止docker容器退出 
+RUN touch /tmp/tailfile
+CMD /usr/sbin/sshd && tail -f /tmp/tailfile
+
+
+
