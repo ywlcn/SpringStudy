@@ -1,0 +1,47 @@
+<configuration>
+
+	<!-- user the OS environment -->
+	<property name="LOG_DIR" value="${ENV_LOG_PATH}/logs/"/>
+	<property name="ENCODING_FILE" value="UTF-8"/>
+	<property name="ENCODING_CONSOLE" value="UTF-8"/>
+	<property name="COMMON_LOG_PATTERN" value="%date{ISO8601}\t[%X{traceId}]\t[%thread]\t[%-5p]\t%c\t%m%n"/>
+
+
+	<!-- the define for appender -->
+	<appender name="APL_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
+		<encoder>
+			<charset>${ENCODING_FILE}</charset>
+			<pattern>${COMMON_LOG_PATTERN}</pattern>
+		</encoder>
+		<file>${LOG_DIR}/apl.log</file>
+		<rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
+			<fileNamePattern>${LOG_DIR}/apl.log.%d{yyyy-MM-dd}.%i.gz</fileNamePattern>
+			<maxFileSize>10MB</maxFileSize>
+			<maxHistory>10</maxHistory>
+		</rollingPolicy>
+	</appender>
+
+	<appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>${COMMON_LOG_PATTERN}</pattern>
+			<charset>${ENCODING_CONSOLE}</charset>
+		</encoder>
+	</appender>
+
+	<!-- Loger’è‹` -->
+	<logger name="org.apache.kafka" additivity="false" level="INFO">
+		<appender-ref ref="APL_LOG" />
+	</logger>
+
+	<appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+		<encoder>
+			<pattern>%msg%n</pattern>
+		</encoder>
+	</appender>
+
+	<root level="debug">
+		<appender-ref ref="FILE" />
+		<appender-ref ref="STDOUT" />
+	</root>
+
+</configuration>
