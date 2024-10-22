@@ -82,11 +82,67 @@ https://logback.qos.ch/manual/layouts.html#conversionWord
 
 ## 1.4 フィルダ
 
+- 任意に複雑な条件を実現して、対象ログを出力するかどうかをフィルターリング	
+  - 通常フィルター(Filter)
+  - ターボフィルター(TurboFilter)
 
+- 区別
+  - `TurboFilter`はロギングコンテキストに紐付けられている。したがって、アペンダーが使用されたときにだけ呼ばれるのではなく、ロギング要求が発生するたびに呼ばれることになる。つまり、ターボフィルターの有効範囲はアペンダーに割り当てられたフィルターよりも広い。
+  - ターボフィルターが呼ばれるのは`LoggingEvent`オブジェクトが作成される前。 `TurboFilter`オブジェクトは、ロギング要求をフィルタリングするのにロギングイベントを必要としない。つまり、ターボフィルターはロギングイベントの高速なフィルタリングを意図したもの。
 
-## 1.5 MDC
+## 1.5 MDC(Mapped Diagnostic Context)
 
+診断コンテキスト
 
+- ソースコードで登録
+
+  ```java
+  package chapters.mdc;
+  
+  import org.slf4j.Logger;
+  import org.slf4j.LoggerFactory;
+  import org.slf4j.MDC;
+  
+  import ch.qos.logback.classic.PatternLayout;
+  import ch.qos.logback.core.ConsoleAppender;
+  
+  public class SimpleMDC {
+    static public void main(String[] args) throws Exception {
+  
+      // MDCにfirstを登録
+      MDC.put("first", "Dorothy");
+  
+      ・・・
+      
+      Logger logger = LoggerFactory.getLogger(SimpleMDC.class);
+      // We now put the last name
+      MDC.put("last", "Parker");
+  
+      // The most beautiful two words in the English language according
+      // to Dorothy Parker:
+      logger.info("Check enclosed.");
+      logger.debug("The most beautiful two words in English.");
+  
+      MDC.put("first", "Richard");
+      MDC.put("last", "Nixon");
+      logger.info("I am not a crook.");
+      logger.info("Attributed to the former US president. 17 Nov 1973.");
+    }
+  
+      ・・・
+  
+  }
+  ```
+
+- レイアウトで利用
+
+  ```xml
+  <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender"> 
+    <layout>
+      <Pattern>%X{first} %X{last} - %m%n</Pattern>
+    </layout> 
+  </appender>
+  ```
 
 # 2 そのほか
 
@@ -94,6 +150,65 @@ https://logback.qos.ch/manual/layouts.html#conversionWord
 
 ### 2.1.1 格納パス
 
+logbackの設定は下記の順番に探している。
+
+1. logback は[クラスパス](https://logback.qos.ch/faq.html#configFileLocation)上で*logback.groovy*というファイルを探します。
+2. 見つからなかったら、今度は[クラスパス](https://logback.qos.ch/faq.html#configFileLocation)上で*logback-test.xml*というファイルを探します。
+3. 見つからなかったら、今度は[クラスパス](https://logback.qos.ch/faq.html#configFileLocation)上で*logback.xml*というファイルを探します。
+4. 何も見つからなかったら、自動的に[`BasicConfigurator`](https://logback.qos.ch/xref/ch/qos/logback/classic/BasicConfigurator.html)を使って設定します。ロギング出力は直接コンソールに出力されるようになります。
+
 ### 2.1.2 分割
 
-### 2.2 JMX
+設定ファイルは複数ファイルに分割することが可能
+
+- Subファイル`src/main/java/chapters/configuration/includedConfig.xml`
+
+  ```xml
+  <included>
+    <appender name="includedConsole" class="ch.qos.logback.core.ConsoleAppender">
+      <encoder>
+        <pattern>"%d - %m%n"</pattern>
+      </encoder>
+    </appender>
+  </included>
+  ```
+
+- 引用
+
+  ```xml
+  <configuration>
+    <include file="src/main/java/chapters/configuration/includedConfig.xml"/>
+  
+    <root level="DEBUG">
+      <appender-ref ref="includedConsole" />
+    </root>
+  
+  </configuration>
+  ```
+
+### 2.1.3 分岐の利用
+
+- ```xml
+     <!-- if-then form -->
+     <if condition="some conditional expression">
+      <then>
+        ...
+      </then>
+    </if>
+  
+    <!-- if-then-else form -->
+    <if condition="some conditional expression">
+      <then>
+        ...
+      </then>
+      <else>
+        ...
+      </else>
+    </if>
+  ```
+
+  
+
+
+
+### 
