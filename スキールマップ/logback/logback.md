@@ -2,7 +2,7 @@
 
 logbackは log4j 1.x の後継者である。 log4j 2.x とは競争関係である。構成上の関係は下記の図を表れている
 
-![logbackVSlog4j](.\images\logbackVSlog4j.png)
+![logbackVSlog4j](./images/logbackVSlog4j.png)
 
 
 
@@ -195,7 +195,7 @@ logbackの設定は下記の順番に探している。
         ...
       </then>
     </if>
-  
+    
     <!-- if-then-else form -->
     <if condition="some conditional expression">
       <then>
