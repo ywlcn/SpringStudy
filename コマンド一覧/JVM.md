@@ -90,6 +90,32 @@ https://dzone.com/articles/troubleshooting-problems-with-native-off-heap-memo
 
 # JVM分析関連コマンド、ツール
 
+## XX:PrintFlagsFinal  
+
+```bash
+java -XX:+PrintFlagsFinal --version
+NOTE: Picked up JDK_JAVA_OPTIONS: --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/java.util.concurrent=ALL-UNNAMED --add-opens=java.base/java.lang=ALL-UNNAMED --add-opens=java.base/java.lang.reflect=ALL-UNNAMED --add-opens=java.base/java.io=ALL-UNNAMED --add-opens=java.base/java.nio=ALL-UNNAMED
+[Global flags]
+      int ActiveProcessorCount                     = -1                                        {product} {default}
+・・・
+     bool VerifySharedSpaces                       = false                                     {product} {default}
+    uintx YoungGenerationSizeIncrement             = 20                                        {product} {default}
+    uintx YoungGenerationSizeSupplement            = 80                                        {product} {default}
+    uintx YoungGenerationSizeSupplementDecay       = 8                                         {product} {default}
+   size_t YoungPLABSize                            = 4096                                      {product} {default}
+   double ZAllocationSpikeTolerance                = 2.000000                                  {product} {default}
+   double ZCollectionInterval                      = 0.000000                                  {product} {default}
+   double ZFragmentationLimit                      = 25.000000                                 {product} {default}
+   size_t ZMarkStackSpaceLimit                     = 8589934592                                {product} {default}
+     bool ZProactive                               = true                                      {product} {default}
+     bool ZUncommit                                = true                                      {product} {default}
+    uintx ZUncommitDelay                           = 300                                       {product} {default}
+     bool ZeroTLAB                                 = false                                     {product} {default}
+openjdk 17.0.8 2023-07-18
+OpenJDK Runtime Environment GraalVM CE 17.0.8+7.1 (build 17.0.8+7-jvmci-23.0-b15)
+OpenJDK 64-Bit Server VM GraalVM CE 17.0.8+7.1 (build 17.0.8+7-jvmci-23.0-b15, mixed mode, sharing)
+```
+
 ## jinfo
 
 ```bash
@@ -106,6 +132,11 @@ jinfo -flags [PID]
 ## jps
 
 起動されているJavaProcessを表示する
+
+```bash
+jps -v
+1904 Jps -XX:ThreadPriorityPolicy=1 -XX:+UnlockExperimentalVMOptions -XX:+EnableJVMCIProduct -XX:-UnlockExperimentalVMOptions -Dapplication.home=D:\Tools-Java\graalvm-community-openjdk-17.0.8+7.1 -Xms8m -Djdk.module.main=jdk.jcmd
+```
 
 ## jstat
 
